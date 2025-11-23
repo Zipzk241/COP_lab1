@@ -1,0 +1,72 @@
+/* Кнопки */
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin: 0.5rem;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn.primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn.secondary {
+  background: #48bb78;
+  color: white;
+}
+
+.btn.danger {
+  background: #f56565;
+  color: white;
+}
+
+/* Ігрове поле */
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 2rem 0;
+  aspect-ratio: 1;
+}
+
+.tile {
+  background: #667eea;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tile:hover:not(.empty) {
+  background: #5a67d8;
+  transform: scale(1.05);
+}
+
+.tile.empty {
+  background: #e2e8f0;
+  cursor: default;
+}
+
+/* Статистика */
+.game-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 1rem 0;
+}
+
+.stat {
+  text-align: center;
+}

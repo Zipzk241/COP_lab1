@@ -1,10 +1,6 @@
 .game-board {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+  display: grid !important;
   gap: 10px;
-  width: 400px;
-  height: 400px;
   margin: 2rem auto;
   background: #e2e8f0;
   padding: 10px;
@@ -17,12 +13,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2rem); 
   font-weight: bold;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
   user-select: none;
+  min-width: 60px;
+  min-height: 60px;
 }
 
 .tile:hover:not(.empty) {

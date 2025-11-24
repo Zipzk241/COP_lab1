@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-function usePuzzleGame() {
+function usePuzzleGame(gridSize = 4) {
   const [tiles, setTiles] = useState([]);
   const [moves, setMoves] = useState(0);
   const [seconds, setSeconds] = useState(0);
@@ -16,13 +16,14 @@ function usePuzzleGame() {
   }, [isActive, isWon]);
 
   const startGame = useCallback(() => {
+    const totalTiles = gridSize * gridSize;
     let newTiles;
     let attempts = 0;
 
     do {
-      newTiles = [...Array(15).keys()].map((i) => i + 1);
-      newTiles.push(0); 
-      for (let i = 15; i > 0; i--) {
+      newTiles = [...Array(totalTiles - 1).keys()].map((i) => i + 1);
+      newTiles.push(0);
+      for (let i = totalTiles - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [newTiles[i], newTiles[j]] = [newTiles[j], newTiles[i]];
       }
@@ -34,7 +35,7 @@ function usePuzzleGame() {
     setSeconds(0);
     setIsActive(true);
     setIsWon(false);
-  }, []);
+  }, [gridSize]);
 
   const isSolvable = (tiles) => {
     let inversions = 0;
@@ -56,11 +57,10 @@ function usePuzzleGame() {
       if (!isActive || isWon) return;
 
       const emptyIndex = tiles.indexOf(0);
-      const size = 4;
-      const row = Math.floor(index / size);
-      const col = index % size;
-      const emptyRow = Math.floor(emptyIndex / size);
-      const emptyCol = emptyIndex % size;
+      const row = Math.floor(index / gridSize);
+      const col = index % gridSize;
+      const emptyRow = Math.floor(emptyIndex / gridSize);
+      const emptyCol = emptyIndex % gridSize;
 
       const isNeighbor =
         (Math.abs(row - emptyRow) === 1 && col === emptyCol) ||
@@ -77,8 +77,8 @@ function usePuzzleGame() {
         setMoves((m) => m + 1);
 
         const solved = newTiles.every((tile, i) => {
-          if (i === 15) return tile === 0; 
-          return tile === i + 1; 
+          if (i === newTiles.length - 1) return tile === 0;
+          return tile === i + 1;
         });
 
         if (solved) {
@@ -87,7 +87,7 @@ function usePuzzleGame() {
         }
       }
     },
-    [tiles, isActive, isWon]
+    [tiles, isActive, isWon, gridSize]
   );
 
   const formatTime = useCallback(() => {
@@ -105,6 +105,7 @@ function usePuzzleGame() {
     isWon,
     startGame,
     moveTile,
+    gridSize,
   };
 }
 

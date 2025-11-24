@@ -1,4 +1,6 @@
 import { useState } from "react";
+import "./styles/components.css";
+import "./styles/global.css";
 import StartPage from "./pages/StartPage";
 import GamePage from "./pages/GamePage";
 import ResultsPage from "./pages/ResultsPage";

@@ -1,21 +1,36 @@
+import { useState } from "react";
 import Container from "../components/common/Container";
 import Button from "../components/common/Button";
 
-function StartPage(props) {
+function StartPage({ onStartGame }) {
+  const [difficulty, setDifficulty] = useState("medium");
+
   return (
     <Container>
       <h1 className="title">П'ятнашки </h1>
       <div className="start-content">
-        <p className="game-description">
-          Зібери плитки від 1 до 15 у правильному порядку!
-        </p>
         <div className="difficulty-selector">
-          <h3>Оберіть складність:</h3>
-          <Button variant="primary">Легко</Button>
-          <Button variant="secondary">Середньо</Button>
-          <Button variant="danger">Важко</Button>
+          <Button
+            variant={difficulty === "easy" ? "primary" : "danger"}
+            onClick={() => setDifficulty("easy")}
+          >
+            Легко
+          </Button>
+          <Button
+            variant={difficulty === "medium" ? "primary" : "danger"}
+            onClick={() => setDifficulty("medium")}
+          >
+            Середньо
+          </Button>
+          <Button
+            variant={difficulty === "medium" ? "primary" : "danger"}
+            onClick={() => setDifficulty("danger")}
+          >
+            Важко
+          </Button>
         </div>
-        <Button onClick={props.onStartGame}>Почати гру!</Button>
+
+        <Button onClick={onStartGame}>Почати гру</Button>
       </div>
     </Container>
   );

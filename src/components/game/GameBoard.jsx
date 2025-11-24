@@ -1,13 +1,18 @@
 import Tile from "./Tile";
 
-function GameBoard() {
+function GameBoard({ tiles, onTileClick }) {
+  if (!tiles || tiles.length === 0) {
+    return <div className="game-board">Завантаження...</div>;
+  }
+
   return (
     <div className="game-board">
-      {[...Array(16)].map((_, i) => (
-        <Tile 
-          key={i}
-          number={i < 15 ? i + 1 : null}
-          isEmpty={i === 15}
+      {tiles.map((number, index) => (
+        <Tile
+          key={index}
+          number={number}
+          isEmpty={number === 0}
+          onClick={() => onTileClick(index)}
         />
       ))}
     </div>

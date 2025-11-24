@@ -1,25 +1,35 @@
+import { useEffect } from "react";
 import Container from "../components/common/Container";
 import Button from "../components/common/Button";
 import GameBoard from "../components/game/GameBoard";
 import GameStats from "../components/game/GameStats";
+import usePuzzleGame from "../hooks/usePuzzleGame";
 
-function GamePage(props) {
+function GamePage({ onExit, onGameWon }) {
+  const { tiles, moves, time, isWon, startGame, moveTile } = usePuzzleGame();
+  useEffect(() => {
+    startGame();
+  }, [startGame]);
+
+  useEffect(() => {
+    if (isWon) {
+      onGameWon({ moves, time });
+    }
+  }, [isWon, moves, time, onGameWon]);
+
   return (
     <Container>
       <h1 className="title">Гра в процесі</h1>
 
-      <GameStats moves={0} time="00:00" />
+      <GameStats moves={moves} time={time} />
 
-      <GameBoard />
+      <GameBoard tiles={tiles} onTileClick={moveTile} />
 
       <div className="game-controls">
-        <Button variant="secondary" onClick={props.onPause}>
-          Пауза
-        </Button>
-        <Button variant="danger" onClick={props.onReset}>
+        <Button variant="secondary" onClick={startGame}>
           Почати заново
         </Button>
-        <Button variant="warning" onClick={props.onExit}>
+        <Button variant="danger" onClick={onExit}>
           Вийти
         </Button>
       </div>

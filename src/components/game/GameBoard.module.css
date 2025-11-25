@@ -1,0 +1,43 @@
+.gameBoard {
+  display: grid;
+  gap: 10px;
+  margin: 2rem auto;
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+  padding: 15px;
+  border-radius: 20px;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.tile {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  min-width: 60px;
+  min-height: 60px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tile:hover:not(.empty) {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 8px 15px rgba(102, 126, 234, 0.4);
+}
+
+.tile:active:not(.empty) {
+  transform: scale(0.98);
+}
+
+.empty {
+  background: transparent;
+  cursor: default;
+  box-shadow: none;
+}

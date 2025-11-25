@@ -1,10 +1,12 @@
-function Tile(props) {
+import styles from "./GameBoard.module.css";
+
+function Tile({ number, isEmpty, onClick }) {
   return (
     <div
-      className={`tile ${props.isEmpty ? "empty" : ""}`}
-      onClick={props.onClick}
+      className={`${styles.tile} ${isEmpty ? styles.empty : ""}`}
+      onClick={onClick}
     >
-      {!props.isEmpty && props.number}
+      {!isEmpty && number}
     </div>
   );
 }

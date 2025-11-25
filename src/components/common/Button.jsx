@@ -1,10 +1,9 @@
-function Button(props) {
+import styles from "./Button.module.css";
+
+function Button({ variant = "primary", children, onClick }) {
   return (
-    <button
-      className={`btn ${props.variant || "primary"}`}
-      onClick={props.onClick}
-    >
-      {props.children}
+    <button className={`${styles.btn} ${styles[variant]}`} onClick={onClick}>
+      {children}
     </button>
   );
 }

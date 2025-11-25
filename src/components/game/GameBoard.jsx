@@ -1,13 +1,14 @@
 import Tile from "./Tile";
+import styles from "./GameBoard.module.css";
 
 function GameBoard({ tiles, onTileClick, gridSize = 4 }) {
   if (!tiles || tiles.length === 0) {
-    return <div className="game-board">Завантаження...</div>;
+    return <div className={styles.gameBoard}>Завантаження...</div>;
   }
 
   return (
     <div
-      className="game-board"
+      className={styles.gameBoard}
       style={{
         gridTemplateColumns: `repeat(${gridSize}, 1fr)`,
         gridTemplateRows: `repeat(${gridSize}, 1fr)`,

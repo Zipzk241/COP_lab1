@@ -1,34 +1,44 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Container from "../components/common/Container";
 import Button from "../components/common/Button";
 import SettingsForm from "../components/game/SettingsForm";
 import useGameSettings from "../hooks/useGameSettings";
 
-function StartPage({ onStartGame }) {
+function StartPage() {
+  const navigate = useNavigate();
   const { settings, updateSettings } = useGameSettings();
   const [showSettings, setShowSettings] = useState(false);
-
-  const handleSaveSettings = (newSettings) => {
-    updateSettings(newSettings);
-    setShowSettings(false);
-  };
+  const [userId, setUserId] = useState("");
 
   const handleStartGame = () => {
-    onStartGame(settings); 
+    const id = userId || Date.now().toString();
+    navigate(`/game/${id}`, { state: { settings } });
+  };
+
+  const handleViewProfile = () => {
+    if (userId) {
+      navigate(`/user/${userId}`);
+    }
   };
 
   return (
     <Container>
       <h1 className="title">П'ятнашки </h1>
       <div className="start-content">
-        {showSettings ? (
-          <SettingsForm
-            currentSettings={settings}
-            onSave={handleSaveSettings}
-            onCancel={() => setShowSettings(false)}
-          />
-        ) : (
+        {!showSettings && (
           <>
+            <div className="user-input">
+              <label htmlFor="userId">Введіть ID гравця:</label>
+              <input
+                id="userId"
+                type="text"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                placeholder="Введіть ваш ID або залиште пустим"
+              />
+            </div>
+
             <div className="current-settings">
               <h3>Поточні налаштування:</h3>
               <p>
@@ -40,19 +50,31 @@ function StartPage({ onStartGame }) {
                   {settings.gridSize}×{settings.gridSize}
                 </strong>
               </p>
-              <p>
-                Таймер:{" "}
-                <strong>
-                  {settings.timerEnabled ? "Увімкнено" : "Вимкнено"}
-                </strong>
-              </p>
             </div>
 
             <Button onClick={handleStartGame}>Почати гру</Button>
+
+            {userId && (
+              <Button variant="secondary" onClick={handleViewProfile}>
+                Переглянути профіль
+              </Button>
+            )}
+
             <Button variant="secondary" onClick={() => setShowSettings(true)}>
               Налаштування
             </Button>
           </>
+        )}
+
+        {showSettings && (
+          <SettingsForm
+            currentSettings={settings}
+            onSave={(newSettings) => {
+              updateSettings(newSettings);
+              setShowSettings(false);
+            }}
+            onCancel={() => setShowSettings(false)}
+          />
         )}
       </div>
     </Container>

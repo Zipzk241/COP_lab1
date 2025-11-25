@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import useSettingsStore from "../../stores/useSettingsStore";
 
 const settingsSchema = yup
   .object({
@@ -18,19 +19,28 @@ const settingsSchema = yup
   })
   .required();
 
-function SettingsForm({ currentSettings, onSave, onCancel }) {
+function SettingsForm({ onCancel }) {
+  const settings = useSettingsStore((state) => state.settings);
+  const updateSettings = useSettingsStore((state) => state.updateSettings);
+
   const {
     register,
     handleSubmit,
     formState: { errors, isValid },
   } = useForm({
     resolver: yupResolver(settingsSchema),
-    defaultValues: currentSettings,
+    defaultValues: settings, 
     mode: "onChange",
   });
 
   const onSubmit = (data) => {
-    onSave(data);
+    updateSettings(data);
+    setTimeout(() => {
+      const current = useSettingsStore.getState().settings;
+    }, 100);
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   return (
@@ -54,16 +64,21 @@ function SettingsForm({ currentSettings, onSave, onCancel }) {
       </div>
 
       <div className="form-group">
-        <label htmlFor="gridSize">Розмір поля:</label>
+        <label htmlFor="gridSize">Розмір поля (3-6):</label>
         <input
           id="gridSize"
           type="number"
-          {...register("gridSize")}
+          {...register("gridSize", { valueAsNumber: true })}
           className={errors.gridSize ? "error" : ""}
+          min="3"
+          max="6"
         />
         {errors.gridSize && (
           <span className="error-message">{errors.gridSize.message}</span>
         )}
+        <small className="form-hint">
+          Поточне значення: {settings.gridSize}
+        </small>
       </div>
 
       <div className="form-group checkbox">
@@ -84,9 +99,15 @@ function SettingsForm({ currentSettings, onSave, onCancel }) {
         <button type="submit" className="btn primary" disabled={!isValid}>
           Зберегти
         </button>
-        <button type="button" className="btn secondary" onClick={onCancel}>
-          Скасувати
-        </button>
+        {onCancel && (
+          <button type="button" className="btn secondary" onClick={onCancel}>
+            Скасувати
+          </button>
+        )}
+      </div>
+      <div className="settings-preview">
+        <h4>Поточні налаштування:</h4>
+        <pre>{JSON.stringify(settings, null, 2)}</pre>
       </div>
     </form>
   );

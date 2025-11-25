@@ -1,92 +1,70 @@
-import { useEffect, useState, useRef } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Container from "../components/common/Container";
 import Button from "../components/common/Button";
 import GameBoard from "../components/game/GameBoard";
 import GameStats from "../components/game/GameStats";
 import WinModal from "../components/game/WinModal";
 import usePuzzleGame from "../hooks/usePuzzleGame";
+import useSettingsStore from "../stores/useSettingsStore";
+import useUserStore from "../stores/useUserStore";
+import useScoresStore from "../stores/useScoresStore";
 
 function GamePage() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const settings = location.state?.settings || {
-    gridSize: 4,
-    timerEnabled: true,
-    soundEnabled: false,
-  };
-  const gridSize = settings.gridSize || 4;
-  const soundEnabled = settings.soundEnabled || false;
-  const { tiles, moves, time, isWon, startGame, moveTile } = usePuzzleGame(
-    gridSize,
-    soundEnabled
-  );
+  const settings = useSettingsStore((state) => state.settings);
+  const registerGameStart = useUserStore((state) => state.registerGameStart);
+  const registerWin = useUserStore((state) => state.registerWin);
+  const addMoves = useUserStore((state) => state.addMoves);
+  const addScore = useScoresStore((state) => state.addScore);
   const [showWinModal, setShowWinModal] = useState(false);
   const gameRegistered = useRef(false);
-  const initialMoves = useRef(0);
+  const { tiles, moves, time, isWon, startGame, moveTile } = usePuzzleGame(
+    settings.gridSize,
+    settings.soundEnabled
+  );
+  const prevGridSize = useRef(settings.gridSize);
+
+  useEffect(() => {
+    if (prevGridSize.current !== settings.gridSize) {
+      prevGridSize.current = settings.gridSize;
+      startGame(); 
+    }
+  }, [settings.gridSize, startGame]);
+
   useEffect(() => {
     if (!gameRegistered.current && userId) {
-      const key = `user_${userId}_stats`;
-      const currentStats = JSON.parse(
-        localStorage.getItem(key) ||
-          '{"gamesStarted":0,"gamesWon":0,"totalMoves":0,"bestScore":null}'
-      );
-      const newStats = {
-        ...currentStats,
-        gamesStarted: currentStats.gamesStarted + 1,
-      };
-
-      localStorage.setItem(key, JSON.stringify(newStats));
+      registerGameStart(userId);
       gameRegistered.current = true;
     }
-  }, [userId]);
-
-  useEffect(() => {
-    if (isWon && userId) {
-      const key = `user_${userId}_stats`;
-      const currentStats = JSON.parse(
-        localStorage.getItem(key) ||
-          '{"gamesStarted":0,"gamesWon":0,"totalMoves":0,"bestScore":null}'
-      );
-
-      const newStats = {
-        gamesStarted: currentStats.gamesStarted, 
-        gamesWon: currentStats.gamesWon + 1,
-        totalMoves: currentStats.totalMoves + moves, 
-        bestScore:
-          !currentStats.bestScore || moves < currentStats.bestScore.moves
-            ? { moves, time }
-            : currentStats.bestScore,
-      };
-
-      localStorage.setItem(key, JSON.stringify(newStats));
-      setShowWinModal(true);
-    }
-  }, [isWon, userId, moves, time]);
-
-  useEffect(() => {
-    return () => {
-      if (userId && !isWon && moves > 0) {
-        const key = `user_${userId}_stats`;
-        const currentStats = JSON.parse(
-          localStorage.getItem(key) ||
-            '{"gamesStarted":0,"gamesWon":0,"totalMoves":0,"bestScore":null}'
-        );
-
-        const newStats = {
-          ...currentStats,
-          totalMoves: currentStats.totalMoves + moves, 
-        };
-
-        localStorage.setItem(key, JSON.stringify(newStats));
-      }
-    };
-  }, [userId, isWon, moves]);
+  }, [userId, registerGameStart]);
 
   useEffect(() => {
     startGame();
   }, [startGame]);
+
+  useEffect(() => {
+    if (isWon && userId) {
+      registerWin(userId, moves);
+      addScore({
+        userId,
+        moves,
+        time,
+        difficulty: settings.difficulty,
+        gridSize: settings.gridSize,
+      });
+      setShowWinModal(true);
+    }
+  }, [isWon, userId, moves, time, settings, registerWin, addScore]);
+
+  useEffect(() => {
+    return () => {
+      if (userId && !isWon && moves > 0) {
+        addMoves(userId, moves);
+      }
+    };
+  }, [userId, isWon, moves, addMoves]);
 
   const handlePlayAgain = () => {
     setShowWinModal(false);
@@ -102,26 +80,6 @@ function GamePage() {
     navigate(`/user/${userId}`);
   };
 
-  const handleRestart = () => {
-    if (userId && moves > 0 && !isWon) {
-      const key = `user_${userId}_stats`;
-      const currentStats = JSON.parse(
-        localStorage.getItem(key) ||
-          '{"gamesStarted":0,"gamesWon":0,"totalMoves":0,"bestScore":null}'
-      );
-
-      const newStats = {
-        ...currentStats,
-        totalMoves: currentStats.totalMoves + moves,
-      };
-
-      localStorage.setItem(key, JSON.stringify(newStats));
-    }
-
-    gameRegistered.current = false;
-    startGame();
-  };
-
   return (
     <Container>
       <div className="game-header">
@@ -129,14 +87,27 @@ function GamePage() {
         <p className="user-id">
           Гравець: <strong>#{userId}</strong>
         </p>
+        <p className="game-settings">
+          {settings.gridSize}×{settings.gridSize} • {settings.difficulty}
+        </p>
       </div>
 
       {settings.timerEnabled && <GameStats moves={moves} time={time} />}
 
-      <GameBoard tiles={tiles} onTileClick={moveTile} gridSize={gridSize} />
+      <GameBoard
+        tiles={tiles}
+        onTileClick={moveTile}
+        gridSize={settings.gridSize}
+      />
 
       <div className="game-controls">
-        <Button variant="secondary" onClick={handleRestart}>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            gameRegistered.current = false;
+            startGame();
+          }}
+        >
           Почати заново
         </Button>
         <Button variant="danger" onClick={handleExit}>

@@ -1,11 +1,24 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
-function usePuzzleGame(gridSize = 4) {
+function usePuzzleGame(gridSize = 4, soundEnabled = false) {
   const [tiles, setTiles] = useState([]);
   const [moves, setMoves] = useState(0);
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [isWon, setIsWon] = useState(false);
+  const moveSound = useRef(null);
+  const winSound = useRef(null);
+  useEffect(() => {
+    moveSound.current = new Audio("/sounds/move.mp3");
+    winSound.current = new Audio("/sounds/win.mp3");
+  }, []);
+
+  useEffect(() => {
+    if (tiles.length > 0 && tiles.length !== gridSize * gridSize) {
+      console.log("🔄 Розмір змінився, перезапускаємо гру");
+      startGame();
+    }
+  }, [gridSize]); 
 
   useEffect(() => {
     let interval = null;
@@ -76,6 +89,11 @@ function usePuzzleGame(gridSize = 4) {
         setTiles(newTiles);
         setMoves((m) => m + 1);
 
+        if (soundEnabled && moveSound.current) {
+          moveSound.current.currentTime = 0;
+          moveSound.current.play().catch(() => {});
+        }
+
         const solved = newTiles.every((tile, i) => {
           if (i === newTiles.length - 1) return tile === 0;
           return tile === i + 1;
@@ -84,10 +102,16 @@ function usePuzzleGame(gridSize = 4) {
         if (solved) {
           setIsWon(true);
           setIsActive(false);
+
+          if (soundEnabled && winSound.current) {
+            setTimeout(() => {
+              winSound.current.play().catch(() => {});
+            }, 100);
+          }
         }
       }
     },
-    [tiles, isActive, isWon, gridSize]
+    [tiles, isActive, isWon, gridSize, soundEnabled]
   );
 
   const formatTime = useCallback(() => {

@@ -3,30 +3,24 @@ import { useNavigate } from "react-router-dom";
 import Container from "../components/common/Container";
 import Button from "../components/common/Button";
 import SettingsForm from "../components/game/SettingsForm";
-import useGameSettings from "../hooks/useGameSettings";
+import useSettingsStore from "../stores/useSettingsStore";
 
 function StartPage() {
   const navigate = useNavigate();
-  const { settings, updateSettings } = useGameSettings();
   const [showSettings, setShowSettings] = useState(false);
   const [userId, setUserId] = useState("");
+  const settings = useSettingsStore((state) => state.settings);
 
   const handleStartGame = () => {
     const id = userId || Date.now().toString();
-    navigate(`/game/${id}`, { state: { settings } });
-  };
-
-  const handleViewProfile = () => {
-    if (userId) {
-      navigate(`/user/${userId}`);
-    }
+    navigate(`/game/${id}`);
   };
 
   return (
     <Container>
       <h1 className="title">П'ятнашки </h1>
       <div className="start-content">
-        {!showSettings && (
+        {!showSettings ? (
           <>
             <div className="user-input">
               <label htmlFor="userId">Введіть ID гравця:</label>
@@ -53,28 +47,18 @@ function StartPage() {
             </div>
 
             <Button onClick={handleStartGame}>Почати гру</Button>
-
-            {userId && (
-              <Button variant="secondary" onClick={handleViewProfile}>
-                Переглянути профіль
-              </Button>
-            )}
-
             <Button variant="secondary" onClick={() => setShowSettings(true)}>
               Налаштування
             </Button>
+            <Button
+              variant="secondary"
+              onClick={() => navigate("/leaderboard")}
+            >
+              Таблиця результатів
+            </Button>
           </>
-        )}
-
-        {showSettings && (
-          <SettingsForm
-            currentSettings={settings}
-            onSave={(newSettings) => {
-              updateSettings(newSettings);
-              setShowSettings(false);
-            }}
-            onCancel={() => setShowSettings(false)}
-          />
+        ) : (
+          <SettingsForm onCancel={() => setShowSettings(false)} />
         )}
       </div>
     </Container>
